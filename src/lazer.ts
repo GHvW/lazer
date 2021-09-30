@@ -118,6 +118,20 @@ export const nth = (n: number) => {
   }
 }
 
+
+// TODO - needs test
+export const scan = <State, A>(reducer: (acc: State, next: A) => State, seed: State) => {
+  return function* (iter: IterableIterator<A>) {
+    let currentState = seed;
+    for (let val of iter) {
+      const nextState = reducer(currentState, val);
+      yield nextState;
+      currentState = nextState;
+    }
+  }
+}
+
+
 export const skip = (n: number) => {
   return function*<T>(iter: IterableIterator<T>) {
     // consume
