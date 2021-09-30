@@ -335,11 +335,11 @@ export const product = (iter: IterableIterator<number>) => {
 // sometimes called fold
 export const reduce = <T, U>(reducer: (acc: U, x: T) => U, initial: U) => {
   return function(iter: IterableIterator<T>): U {
-    let next = iter.next();
-    if (next.done) {
-      return initial;
+    let currentState = initial;
+    for (let val of iter) {
+      currentState = reducer(currentState, val);
     }
-    return reduce(reducer, reducer(initial, next.value))(iter);
+    return currentState;
   };
 }
 
