@@ -1,4 +1,4 @@
-import { chain, enumerate, filter, flatMap, flatten } from "../src/sequenceOperations";
+import { take, takeWhile, zip, nth, skip, skipWhile, map, chain, enumerate, filter, flatMap, flatten } from "../src/sequenceOperations";
 
 let arr = [1, 2, 3];
 let bigArr = [1, 2, 3, 4, 5, 6];
@@ -13,12 +13,6 @@ test("Seq iter(): allows you to exhaust the underlying IterableIterator", () => 
 });
 
 
-test("any: returns true if any values match the predicate, false if not. Short circuits on match leaving the rest unconsumed", () => {
-  let seq = bigArr.values();
-
-  expect(any((x: number) => x % 2 === 0)(seq)).toBe(true);
-  expect(seq.next().value).toBe(3);
-});
 
 test("test chain: chains two iterators together to yield values from the first then the second", () => {
   let arr1 = [0, 2];
@@ -73,15 +67,6 @@ test("flatten: flattens a 2d iterable to a 1d iterable of the same elements", ()
   expect(seq.next().value).toBe(2);
   expect(seq.next().value).toBe(3);
   expect(seq.next().value).toBe(undefined);
-});
-
-
-test("forEach: forEach consumes the iterator, mimicing a for-loop's behavior", () => {
-  let total = 10;
-
-  forEach((x: number) => total += x)(bigArr.values());
-
-  expect(total).toBe(31);
 });
 
 

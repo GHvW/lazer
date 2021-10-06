@@ -1,0 +1,232 @@
+import { reduce, sum, max, min, minByKey, maxByKey, collect, find, partition, position, product, toArray, all, count, any, forEach } from "../src/terminalOperations";
+import { map, filter } from "../src/sequenceOperations";
+
+let arr = [1, 2, 3];
+let bigArr = [1, 2, 3, 4, 5, 6];
+
+test("any: returns true if any values match the predicate, false if not. Short circuits on match leaving the rest unconsumed", () => {
+  let seq = bigArr.values();
+
+  expect(any((x: number) => x % 2 === 0)(seq)).toBe(true);
+  expect(seq.next().value).toBe(3);
+});
+
+
+test("all: tests if all values of the sequence match the given predicate. Short circuits on false value", () => {
+  let seq1 = arr.values();
+  let result1 = all((x: number) => x < 10)(seq1);
+
+  expect(result1).toBe(true);
+  expect(seq1.next().value).toBe(undefined);
+
+  let seq2 = arr.values();
+  let result2 = all((x: number) => x < 2)(seq2);
+
+  expect(result2).toBe(false);
+  expect(seq2.next().value).toBe(3);
+});
+
+test("count: counts the number of values in the sequence, consuming it in the process", () => {
+  let seq = bigArr.values();
+  let result = count(seq);
+
+  expect(result).toBe(6);
+  expect(seq.next().value).toBe(undefined);
+});
+
+
+test("forEach: forEach consumes the iterator, mimicing a for-loop's behavior", () => {
+  let total = 10;
+
+  forEach((x: number) => total += x)(bigArr.values());
+
+  expect(total).toBe(31);
+});
+
+
+test("find: finds a value that satisfies the given predicate and returns it. Does not consume the rest of the sequence", () => {
+  let seq = arr.values();
+  let val = find((x: number) => x === 2)(seq);
+
+  expect(val).toBe(2);
+  expect(seq.next().value).toBe(3);
+  expect(seq.next().value).toBe(undefined);
+
+  let seq2 = arr.values();
+  let val2 = find((x: number) => x === 5)(seq2);
+  expect(val2).toBe(undefined);
+  expect(seq2.next().value).toBe(undefined);
+});
+
+test("max: returns the maximum value of the sequence, consuming the sequence", () => {
+  let result = max(arr.values());
+
+  expect(result).toBe(3);
+});
+
+test("maxByKey: returns the element that gives the max value from the function", () => {
+  let max = maxByKey((x: number) => x - 2 * x)(bigArr.values());
+
+  expect(max).toBe(1);
+
+  let empty: number[] = [];
+  let emptyMax = maxByKey((x: number) => x * 2)(empty.values());
+
+  expect(emptyMax).toBe(undefined);
+});
+
+test("min: returns the minimum value of the sequence, consuming the sequence", () => {
+  let result = min(arr.values());
+
+  expect(result).toBe(1);
+});
+
+
+test("minByKey: returns the element that gives the min value from the function", () => {
+  let min = minByKey((x: number) => x * -x)(bigArr.values());
+
+  expect(min).toBe(6)
+
+  let empty: number[] = [];
+  let emptyMin = minByKey((x: number) => x * 2)(empty.values());
+
+  expect(emptyMin).toBe(undefined);
+});
+
+test("partition: consumes the sequence creating two arrays. one with values that satisfy the predicate and one with values that do not", () => {
+  let part = partition((x: number) => x % 2 === 0)(bigArr.values());
+
+  expect(part[0]).toEqual([2, 4, 6]);
+  expect(part[1]).toEqual([1, 3, 5]);
+});
+
+// TODO expand this test
+test("position: returns the position of the value that matches the predicate or null if there is not a match", () => {
+  let index = position((x: number) => x === 2)(arr.values());
+
+  expect(index).toBe(1);
+});
+
+
+test("product: returns the product of all values in the sequence, consuming the sequence", () => {
+  let result = product(arr.values());
+
+  expect(result).toBe(6);
+});
+
+test("reduce: applys a reducer function to each element and an accumulated value, producing a single result", () => {
+  let sum = reduce((acc: number, x: number) => acc + x, 0)(bigArr.values());
+
+  expect(sum).toBe(21);
+});
+
+test("sum: returns the sum of all values in the sequence, consuming the sequence", () => {
+  let result = sum(arr.values());
+
+  expect(result).toBe(6);
+});
+
+
+test("toArray: consumes the sequence, returning an array of its values", () => {
+  let result = toArray(arr.map(x => x + 1).values());
+
+  expect(result).toEqual([2, 3, 4]);
+});
+
+//XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+test("collect: applies a collector function to the sequence, consuming it and producing a final value", () => {
+  const plus5er = (iter: IterableIterator<number>) => {
+    let arr = [];
+    for (let val of iter) {
+      arr.push(val + 5);
+    }
+    return arr;
+  }
+
+  let result = collect(plus5er)(arr.values());
+
+  expect(result).toEqual([6, 7, 8]);
+});
+
+// ---- *** ----
+
+
+
+// test("andThen: pipes a sequence through a series of generator functions", () => {
+//   let seq = Seq.from(bigArr)
+//     .andThen(map(x => x + 10))
+//     .andThen(filter(x => x % 2 === 0));
+
+//   let result = collect(toArray)(seq.iter());
+  
+//   expect(result).toEqual([12, 14, 16]);
+// });
+
+// test("andThen iter: make sure sequences evaluate correctly", () => {
+//   const seq = Seq.from(bigArr)
+//     .andThen(filter(x => x % 2 === 0))
+//     .andThen(map(x => x + 10))
+//     .iter();
+
+//   const first = seq.next().value; 
+//   const second = seq.next().value;
+//   const third = seq.next().value;
+  
+//   expect(first).toEqual(12);
+//   expect(second).toEqual(14);
+//   expect(third).toEqual(16);
+// });
+
+// test("Sequence collect: same as collect, but lets you 'dot' off of a Sequence. Defaults to 'toArray'", () => {
+
+//   const result1 = Seq.from(bigArr)
+//     .andThen(filter(x => x % 2 === 0))
+//     .andThen(map(x => x + 10))
+//     .collect();
+
+//   const result2 = Seq.from(bigArr)
+//     .andThen(filter(x => x % 2 === 0))
+//     .andThen(map(x => x + 10))
+//     .collect(sum);
+
+//   expect(result1).toEqual([12, 14, 16]);
+//   expect(result2).toEqual(42);
+// });
+
+// test("Map: tests functionality with Map.prototype.entries()", () => {
+//   const hashmap = new Map([["Texas", "Austin"], ["Massachusetts", "Boston"], ["Washington", "Olympia"], ["Iowa", "Des Moines"]]);
+//   const result = 
+//     Seq.from(hashmap.entries())
+//       .andThen(filter(([state, _]) => state.length < 6))
+//       .andThen(map(([_, city]) => city))
+//       .collect();
+
+//     expect(result).toEqual(["Austin", "Des Moines"]);
+// });
+
+// test("first docs example", () => {
+//   const arr = collect(toArray)(map((n: number) => n * 10)(filter((n: number) => n % 2 === 0)([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].values())));
+
+//   expect(arr).toEqual([20, 40, 60, 80, 100]);
+// });
+
+// test("second docs example", () => {
+
+//   const arr =
+//     Seq.of(1, 2, 3, 4, 5, 6, 8, 9, 10) // could also be written `Seq.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].values())
+//         .andThen(filter(n => n % 2 === 0))
+//         .andThen(map(n => n * 10))
+//         .collect();
+
+//   expect(arr).toEqual([20, 40, 60, 80, 100]);
+// });
+
+// test("third docs example", () => {
+//   const result =
+//     Seq.of(1, 2, 3, 4, 5, 6, 8, 9, 10) // could also be written `Seq.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].values())
+//         .andThen(filter(n => n % 2 === 0))
+//         .andThen(map(n => n * 10))
+//         .collect(sum);
+
+//   expect(result).toEqual(300);
+// });

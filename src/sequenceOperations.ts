@@ -48,14 +48,6 @@ export const flatten = function*<T>(iter: IterableIterator<Iterable<T>>) {
 }
 
 
-export const forEach = <T>(fn: (x: T) => void) => {
-  return function(iter: IterableIterator<T>) {
-    for (let val of iter) {
-      fn(val);
-    }
-  }
-}
-
 export const map = <T, U>(fn: (x: T) => U) => {
   return function*(iter: IterableIterator<T>) {
       for (let val of iter) {

@@ -45,6 +45,15 @@ export const find = <T>(predicate: (x: T) => boolean) => {
   }
 }
 
+
+export const forEach = <T>(fn: (x: T) => void) => {
+  return function(iter: IterableIterator<T>) {
+    for (let val of iter) {
+      fn(val);
+    }
+  }
+}
+
 export const max = <T>(iter: IterableIterator<T>) => {
   let max = iter.next().value;
   for (let val of iter) {
